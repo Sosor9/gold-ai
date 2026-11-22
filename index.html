@@ -4,174 +4,416 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GOLD AI</title>
-
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#080b12;color:white;font-family:Arial,sans-serif}
-header{text-align:center;padding:25px;color:#e5bd55;font-size:30px;font-weight:bold;letter-spacing:3px}
-.subtitle{text-align:center;color:#888;font-size:12px;margin-top:-15px}
-.container{max-width:650px;margin:auto;padding:15px}
-.card{background:#141a25;border:1px solid #303747;border-radius:15px;padding:20px;margin-bottom:18px}
-h2{text-align:center;color:#e5bd55;font-size:19px}
-label{display:block;color:#aaa;margin:15px 0 7px}
-select,button{width:100%;padding:13px;border-radius:8px;border:1px solid #303747;background:#202938;color:white;font-size:15px}
-button{background:#d5ad42;color:#080808;font-weight:bold;border:0;margin-top:20px;cursor:pointer}
-.chart-box{width:100%;height:270px;margin-top:15px}
-canvas{width:100%;height:100%;display:block}
-.chart-note{font-size:11px;color:#888;text-align:center}
-.signal{text-align:center;padding:20px;border-radius:12px;margin-top:15px;background:#101722}
-.signal-icon{font-size:55px}
-.buy{color:#21d889}
-.sell{color:#ff5151}
-.neutral{color:#e5bd55}
-.signal-title{font-size:28px;font-weight:bold;margin:8px}
-.info{font-size:12px;color:#888}
-.footer{text-align:center;color:#666;font-size:11px;padding:20px}
+:root {
+ --bg: #080b12;
+ --panel: #111722;
+ --panel2: #171f2d;
+ --gold: #e6b94f;
+ --green: #20c997;
+ --red: #ff5b68;
+ --text: #f4f6fa;
+ --muted: #8993a5;
+ --border: #263143;
+}
+* { box-sizing: border-box; }
+body {
+ margin: 0;
+ padding: 18px;
+ background: radial-gradient(circle at top, #182235, var(--bg) 55%);
+ color: var(--text);
+ font-family: Arial, sans-serif;
+}
+.app { max-width: 950px; margin: auto; }
+header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ flex-wrap: wrap;
+ gap: 12px;
+ margin-bottom: 22px;
+}
+.logo { font-size: 27px; font-weight: 900; }
+.logo span { color: var(--gold); }
+.badge {
+ color: var(--gold);
+ border: 1px solid #725b2b;
+ background: #302614;
+ padding: 7px 12px;
+ border-radius: 20px;
+ font-size: 12px;
+}
+.card {
+ background: linear-gradient(145deg, var(--panel), #0d121c);
+ border: 1px solid var(--border);
+ border-radius: 17px;
+ padding: 18px;
+ margin-bottom: 15px;
+}
+.row {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ flex-wrap: wrap;
+ gap: 12px;
+}
+label { color: var(--muted); font-size: 12px; display: block; margin-bottom: 7px; }
+select, button {
+ border: 1px solid var(--border);
+ background: var(--panel2);
+ color: var(--text);
+ border-radius: 10px;
+ padding: 12px;
+ font-size: 14px;
+}
+select { min-width: 125px; }
+button { cursor: pointer; transition: .2s; }
+button:active { transform: scale(.96); }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--gold); }
+.price {
+ font-size: clamp(30px, 7vw, 43px);
+ font-weight: 800;
+ margin: 10px 0;
+}
+.muted { color: var(--muted); font-size: 13px; }
+.status { color: var(--gold); font-size: 12px; }
+canvas {
+ display: block;
+ width: 100%;
+ height: 260px;
+ margin-top: 12px;
+}
+.timeframes {
+ display: flex;
+ gap: 8px;
+ flex-wrap: wrap;
+ margin-top: 15px;
+}
+.timeframes button.active {
+ background: var(--gold);
+ color: #17120a;
+ border-color: var(--gold);
+ font-weight: bold;
+}
+.signal {
+ text-align: center;
+ padding: 23px 12px;
+ border-radius: 14px;
+ background: var(--panel2);
+ margin-top: 15px;
+}
+.signal strong { font-size: 27px; display: block; margin: 8px; }
+.actions {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 10px;
+ margin-top: 15px;
+}
+.actions button { font-weight: bold; padding: 17px 5px; }
+.buy { background: #123b34; border-color: #237d68; color: #54e3b4; }
+.sell { background: #421e29; border-color: #8a3447; color: #ff8290; }
+.neutral { background: #252e3d; }
+.buy.selected { box-shadow: 0 0 0 2px var(--green); }
+.sell.selected { box-shadow: 0 0 0 2px var(--red); }
+.neutral.selected { box-shadow: 0 0 0 2px #aebbd0; }
+.metrics {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 10px;
+ margin-top: 15px;
+}
+.metric {
+ background: var(--panel2);
+ padding: 13px;
+ border-radius: 10px;
+}
+.metric strong { display: block; margin-top: 8px; font-size: 17px; }
+.warning {
+ border: 1px solid #665126;
+ background: #2a2113;
+ color: #e9c879;
+ border-radius: 12px;
+ padding: 13px;
+ font-size: 12px;
+ line-height: 1.5;
+}
+@media(max-width:560px) {
+ body { padding: 12px; }
+ .metrics { grid-template-columns: 1fr 1fr; }
+ .actions { gap: 6px; }
+ .actions button { font-size: 12px; }
+}
 </style>
 </head>
-
 <body>
+<main class="app">
+<header>
+ <div class="logo">GOLD <span>AI</span></div>
+ <div class="badge">MODE DÉMO · SANS ORDRES RÉELS</div>
+</header>
 
-<header>GOLD AI</header>
-<p class="subtitle">SMART MARKET ANALYSIS</p>
+<section class="card">
+ <div class="row">
+ <div>
+ <label>ACTIF</label>
+ <select id="asset">
+ <option value="XAUUSD">XAUUSD · GOLD</option>
+ <option value="EURUSD">EUR/USD</option>
+ <option value="GBPUSD">GBP/USD</option>
+ <option value="BTCUSD">BTC/USD</option>
+ <option value="ETHUSD">ETH/USD</option>
+ </select>
+ </div>
+ <div>
+ <label>TYPE D'ANALYSE</label>
+ <select id="mode">
+ <option value="simple">Sans SL / TP</option>
+ <option value="risk">Avec SL / TP</option>
+ </select>
+ </div>
+ </div>
+ <div class="muted" style="margin-top:20px">PRIX INDICATIF DE DÉMONSTRATION</div>
+ <div class="price" id="price">--</div>
+ <div class="status" id="connection">● Aucune source de marché connectée</div>
+ <div class="metrics">
+ <div class="metric"><label>DERNIÈRE MISE À JOUR</label><strong id="updated">--</strong></div>
+ <div class="metric"><label>ÉVOLUTION DÉMO</label><strong id="change">--</strong></div>
+ <div class="metric"><label>UNITÉ</label><strong id="unit">USD</strong></div>
+ </div>
+</section>
 
-<div class="container">
+<section class="card">
+ <div class="row">
+ <div>
+ <strong>Graphique de démonstration</strong>
+ <div class="muted">Bougies générées localement · pas de cours réels</div>
+ </div>
+ <span class="badge" id="chartAsset">XAUUSD</span>
+ </div>
+ <div class="timeframes" id="timeframes">
+ <button class="active" data-tf="M1">M1</button>
+ <button data-tf="M5">M5</button>
+ <button data-tf="M15">M15</button>
+ <button data-tf="H1">H1</button>
+ </div>
+ <canvas id="chart" aria-label="Graphique de bougies simulées"></canvas>
+</section>
 
-<div class="card">
-<h2>MARKET CHART</h2>
+<section class="card">
+ <div class="row">
+ <strong>Analyse GOLD AI</strong>
+ <span class="badge">SIMULATION</span>
+ </div>
+ <div class="signal">
+ <div class="muted">INDICATION DE DÉMONSTRATION</div>
+ <strong id="signal">EN ATTENTE</strong>
+ <div class="muted" id="signalText">Aucune analyse de marché réelle n'est connectée.</div>
+ </div>
+ <div class="actions">
+ <button class="buy" id="buy">▲ BUY</button>
+ <button class="neutral selected" id="none">— NO TRADE</button>
+ <button class="sell" id="sell">▼ SELL</button>
+ </div>
+ <div class="metrics">
+ <div class="metric"><label>STOP LOSS DÉMO</label><strong id="sl">--</strong></div>
+ <div class="metric"><label>TAKE PROFIT DÉMO</label><strong id="tp">--</strong></div>
+ <div class="metric"><label>EXPIRATION</label><strong id="expiry">--</strong></div>
+ </div>
+</section>
 
-<label>Actif :</label>
-<select id="asset">
-<option>XAUUSD</option>
-<option>EUR/USD</option>
-<option>GBP/USD</option>
-<option>BTC/USD</option>
-<option>ETH/USD</option>
-</select>
-
-<label>Timeframe :</label>
-<select id="timeframe">
-<option>M1</option>
-<option>M5</option>
-<option>M15</option>
-<option>H1</option>
-</select>
-
-<div class="chart-box">
-<canvas id="chart"></canvas>
+<div class="warning">
+ Cette version est uniquement une interface de démonstration. Les prix, bougies et indications ne proviennent pas de RaiseFX ou de MT5. Aucun signal réel n'est calculé et aucun ordre n'est envoyé. Ne l'utilise pas pour prendre une position financière.
 </div>
-
-<p class="chart-note">
-Graphique de démonstration : bougies simulées, pas de prix réels.
-</p>
-
-<button onclick="drawChart()">ACTUALISER LE GRAPHIQUE</button>
-</div>
-
-<div class="card">
-<h2>TRADING SIGNALS</h2>
-
-<label>Mode :</label>
-<select id="mode">
-<option>Avec SL / TP</option>
-<option>Sans SL / TP</option>
-</select>
-
-<button onclick="analyze()">ANALYSER LE MARCHÉ</button>
-
-<div id="result" class="signal">
-<div class="signal-icon neutral">◆</div>
-<div class="signal-title neutral">EN ATTENTE</div>
-<p>Aucune analyse disponible.</p>
-<p class="info">Connexion aux données de marché nécessaire.</p>
-</div>
-</div>
-
-</div>
-
-<div class="footer">
-GOLD AI © 2026 — Version démonstration
-</div>
+</main>
 
 <script>
-function drawChart(){
-const canvas=document.getElementById("chart");
-const box=canvas.parentElement;
-const width=box.clientWidth;
-const height=box.clientHeight;
-const ratio=window.devicePixelRatio||1;
+const asset = document.getElementById("asset");
+const mode = document.getElementById("mode");
+const priceEl = document.getElementById("price");
+const chart = document.getElementById("chart");
+const ctx = chart.getContext("2d");
 
-canvas.width=width*ratio;
-canvas.height=height*ratio;
+let timeframe = "M1";
+let currentPrice = 2350;
+let candles = [];
+let selectedSignal = "NO TRADE";
+let demoTimer = null;
 
-const ctx=canvas.getContext("2d");
-ctx.scale(ratio,ratio);
-ctx.clearRect(0,0,width,height);
+const settings = {
+ XAUUSD: { price: 2350, digits: 2 },
+ EURUSD: { price: 1.08, digits: 5 },
+ GBPUSD: { price: 1.27, digits: 5 },
+ BTCUSD: { price: 68000, digits: 2 },
+ ETHUSD: { price: 3500, digits: 2 }
+};
 
-ctx.strokeStyle="#283243";
-ctx.lineWidth=1;
-
-for(let i=1;i<5;i++){
-let y=height*i/5;
-ctx.beginPath();
-ctx.moveTo(0,y);
-ctx.lineTo(width,y);
-ctx.stroke();
+function formatPrice(value) {
+ const digits = settings[asset.value].digits;
+ return value.toLocaleString("en-US", {
+ minimumFractionDigits: digits,
+ maximumFractionDigits: digits
+ });
 }
 
-let candles=[];
-let price=150;
-for(let i=0;i<35;i++){
-let open=price;
-let close=open+(Math.random()-.48)*5;
-let high=Math.max(open,close)+Math.random()*2;
-let low=Math.min(open,close)-Math.random()*2;
-candles.push({open,close,high,low});
-price=close;
+function makeCandles() {
+ candles = [];
+ currentPrice = settings[asset.value].price;
+ const volatility = currentPrice * 0.0007;
+
+ for (let i = 0; i < 55; i++) {
+ const open = currentPrice;
+ const close = open + (Math.random() - 0.49) * volatility;
+ const high = Math.max(open, close) + Math.random() * volatility * 0.4;
+ const low = Math.min(open, close) - Math.random() * volatility * 0.4;
+ candles.push({ open, close, high, low });
+ currentPrice = close;
+ }
+ updateDisplay();
+ drawChart();
 }
 
-let min=Math.min(...candles.map(c=>c.low));
-let max=Math.max(...candles.map(c=>c.high));
-let range=max-min||1;
-
-function y(value){
-return height-((value-min)/range)*(height-20)-10;
+function updateDisplay() {
+ priceEl.textContent = formatPrice(currentPrice);
+ document.getElementById("updated").textContent = "SIMULÉ";
+ document.getElementById("change").textContent =
+ ((currentPrice / settings[asset.value].price - 1) * 100).toFixed(2) + "%";
+ document.getElementById("unit").textContent = "USD";
+ document.getElementById("chartAsset").textContent = asset.value;
+ document.getElementById("connection").textContent =
+ "● MODE DÉMO — données simulées";
 }
 
-let gap=width/candles.length;
-candles.forEach((c,i)=>{
-let x=i*gap+gap/2;
-let color=c.close>=c.open?"#21d889":"#ff5151";
+function drawChart() {
+ const width = chart.clientWidth;
+ const height = chart.clientHeight;
+ const ratio = window.devicePixelRatio || 1;
+ chart.width = width * ratio;
+ chart.height = height * ratio;
+ ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+ ctx.clearRect(0, 0, width, height);
 
-ctx.strokeStyle=color;
-ctx.fillStyle=color;
-ctx.lineWidth=1.5;
+ if (!candles.length) return;
 
-ctx.beginPath();
-ctx.moveTo(x,y(c.high));
-ctx.lineTo(x,y(c.low));
-ctx.stroke();
+ const values = candles.flatMap(c => [c.high, c.low]);
+ const min = Math.min(...values);
+ const max = Math.max(...values);
+ const range = max - min || 1;
+ const y = value => height - 15 - ((value - min) / range) * (height - 30);
+ const step = width / candles.length;
+ const bodyWidth = Math.max(3, step * 0.58);
 
-let top=Math.min(y(c.open),y(c.close));
-let body=Math.max(2,Math.abs(y(c.open)-y(c.close)));
+ ctx.strokeStyle = "#263143";
+ ctx.lineWidth = 1;
+ for (let i = 1; i < 4; i++) {
+ const lineY = (height / 4) * i;
+ ctx.beginPath();
+ ctx.moveTo(0, lineY);
+ ctx.lineTo(width, lineY);
+ ctx.stroke();
+ }
 
-ctx.fillRect(x-gap*.3,top,gap*.6,body);
+ candles.forEach((c, i) => {
+ const x = i * step + step / 2;
+ const rising = c.close >= c.open;
+ const color = rising ? "#20c997" : "#ff5b68";
+ ctx.strokeStyle = color;
+ ctx.fillStyle = color;
+ ctx.beginPath();
+ ctx.moveTo(x, y(c.high));
+ ctx.lineTo(x, y(c.low));
+ ctx.stroke();
+
+ const top = Math.min(y(c.open), y(c.close));
+ const bodyHeight = Math.max(2, Math.abs(y(c.open) - y(c.close)));
+ ctx.fillRect(x - bodyWidth / 2, top, bodyWidth, bodyHeight);
+ });
+}
+
+function updateDemo() {
+ const volatility = settings[asset.value].price * 0.00035;
+ const open = currentPrice;
+ const close = open + (Math.random() - 0.5) * volatility;
+ const high = Math.max(open, close) + Math.random() * volatility * 0.3;
+ const low = Math.min(open, close) - Math.random() * volatility * 0.3;
+
+ candles.push({ open, close, high, low });
+ if (candles.length > 55) candles.shift();
+ currentPrice = close;
+ updateDisplay();
+ drawChart();
+}
+
+function resetSignal() {
+ selectedSignal = "NO TRADE";
+ document.getElementById("signal").textContent = "EN ATTENTE";
+ document.getElementById("signalText").textContent =
+ "Aucune analyse de marché réelle n'est connectée.";
+ document.getElementById("sl").textContent = "--";
+ document.getElementById("tp").textContent = "--";
+ document.getElementById("expiry").textContent = "--";
+ document.querySelectorAll(".actions button").forEach(b => b.classList.remove("selected"));
+ document.getElementById("none").classList.add("selected");
+}
+
+function chooseSignal(type) {
+ selectedSignal = type;
+ document.querySelectorAll(".actions button").forEach(b => b.classList.remove("selected"));
+ document.getElementById(type === "BUY" ? "buy" : type === "SELL" ? "sell" : "none")
+ .classList.add("selected");
+
+ const signal = document.getElementById("signal");
+ signal.textContent = type;
+ document.getElementById("signalText").textContent =
+ "Choix manuel de démonstration — ce n'est pas un signal de marché.";
+
+ if (type === "NO TRADE") {
+ document.getElementById("sl").textContent = "--";
+ document.getElementById("tp").textContent = "--";
+ document.getElementById("expiry").textContent = "--";
+ return;
+ }
+
+ if (mode.value === "risk") {
+ const distance = settings[asset.value].price * 0.001;
+ const stop = type === "BUY" ? currentPrice - distance : currentPrice + distance;
+ const target = type === "BUY" ? currentPrice + distance * 2 : currentPrice - distance * 2;
+ document.getElementById("sl").textContent = formatPrice(stop);
+ document.getElementById("tp").textContent = formatPrice(target);
+ } else {
+ document.getElementById("sl").textContent = "Désactivé";
+ document.getElementById("tp").textContent = "Désactivé";
+ }
+
+ document.getElementById("expiry").textContent = "30 secondes";
+}
+
+asset.addEventListener("change", () => {
+ resetSignal();
+ makeCandles();
 });
-}
 
-function analyze(){
-document.getElementById("result").innerHTML=`
-<div class="signal-icon neutral">◆</div>
-<div class="signal-title neutral">EN ATTENTE</div>
-<p>${document.getElementById("asset").value}</p>
-<p>Aucune donnée réelle connectée.</p>
-<p class="info">L'analyse automatique sera disponible après connexion aux données de marché et au moteur d'analyse.</p>
-`;
-}
+mode.addEventListener("change", () => {
+ if (selectedSignal !== "NO TRADE") chooseSignal(selectedSignal);
+});
 
-drawChart();
-window.addEventListener("resize",drawChart);
+document.getElementById("buy").addEventListener("click", () => chooseSignal("BUY"));
+document.getElementById("sell").addEventListener("click", () => chooseSignal("SELL"));
+document.getElementById("none").addEventListener("click", () => chooseSignal("NO TRADE"));
+
+document.querySelectorAll("#timeframes button").forEach(button => {
+ button.addEventListener("click", () => {
+ document.querySelectorAll("#timeframes button").forEach(b => b.classList.remove("active"));
+ button.classList.add("active");
+ timeframe = button.dataset.tf;
+ resetSignal();
+ makeCandles();
+ });
+});
+
+window.addEventListener("resize", drawChart);
+
+makeCandles();
+demoTimer = setInterval(updateDemo, 1800);
 </script>
-
 </body>
 </html>
