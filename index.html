@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOLD AI</title>
+<style>
+body {
+  margin: 0;
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+header {
+  padding: 25px;
+  color: #e5bd55;
+  font-size: 30px;
+  font-weight: bold;
+}
+.container {
+  padding: 20px;
+}
+.card {
+  background: #171717;
+  border: 1px solid #b89535;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 15px auto;
+  max-width: 400px;
+}
+select, button {
+  width: 100%;
+  padding: 13px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
+button {
+  background: #d5ad42;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+.price {
+  color: #e5bd55;
+  font-size: 25px;
+}
+</style>
+</head>
+<body>
+
+<header>GOLD AI</header>
+
+<div class="container">
+  <div class="card">
+    <h2>Trading Signals</h2>
+    <p>Choisis ton actif :</p>
+    <select id="asset">
+      <option>XAUUSD</option>
+      <option>EUR/USD</option>
+      <option>GBP/USD</option>
+      <option>BTC/USD</option>
+      <option>ETH/USD</option>
+    </select>
+
+    <p>Timeframe :</p>
+    <select id="timeframe">
+      <option>M1</option>
+      <option>M5</option>
+      <option>M15</option>
+      <option>H1</option>
+    </select>
+
+    <p>Mode :</p>
+    <select id="mode">
+      <option>Avec SL / TP</option>
+      <option>Sans SL / TP</option>
+    </select>
+
+    <button onclick="analyze()">ANALYSER LE MARCHÉ</button>
+    <div id="result"></div>
+  </div>
+</div>
+
+<script>
+function analyze() {
+  document.getElementById("result").innerHTML =
+  "<p style='color:#e5bd55'>Analyse en attente...</p>" +
+  "<p>La connexion aux données de marché doit encore être configurée.</p>";
+}
+</script>
+
+</body>
+</html>
