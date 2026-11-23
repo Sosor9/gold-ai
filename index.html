@@ -4,587 +4,213 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GOLD AI</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <style>
 :root {
---bg:#080b12;
---card:#111824;
---card2:#192333;
---gold:#e8bd59;
---green:#20d49a;
---red:#ff6474;
---text:#f4f6fa;
---muted:#8995a8;
---border:#29364a;
+--bg:#080b12; --card:#111824; --gold:#e8bd59;
+--green:#20d49a; --red:#ff6474; --text:#f4f6fa;
+--muted:#8995a8; --border:#29364a;
 }
-*{box-sizing:border-box}
-body{margin:0;padding:15px;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-.app{max-width:950px;margin:auto}
-header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-.logo{font-size:28px;font-weight:900}
-.logo span{color:var(--gold)}
-.badge{font-size:11px;padding:8px 11px;border-radius:20px;background:#302716;color:var(--gold);border:1px solid #725b2b}
-.card{background:linear-gradient(145deg,var(--card),#0d131e);border:1px solid var(--border);border-radius:17px;padding:17px;margin-bottom:15px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-label{display:block;color:var(--muted);font-size:11px;margin-bottom:7px}
-select,button{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px}
-select{min-width:130px}
-button{cursor:pointer;transition:.2s}
-button:active{transform:scale(.97)}
-.price{font-size:clamp(32px,8vw,45px);font-weight:800;margin:12px 0}
-.muted{font-size:12px;color:var(--muted);line-height:1.5}
-.status{font-size:12px;margin-top:8px}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}
-.metric{background:var(--card2);padding:12px;border-radius:10px;min-width:0}
-.metric strong{display:block;font-size:16px;margin-top:8px;overflow-wrap:anywhere}
-.timeframes{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
-.timeframes button.active{background:var(--gold);color:#17120a;font-weight:bold}
-canvas{width:100%;height:280px;display:block;margin-top:15px}
-.signal{text-align:center;padding:25px 12px;background:var(--card2);border-radius:13px;margin-top:15px}
-.signal strong{font-size:34px;display:block;margin:10px}
-.buyText{color:var(--green)}
-.sellText{color:var(--red)}
-.waitText{color:var(--gold)}
-.actions{display:flex;gap:10px;margin-top:14px}
-.actions button{flex:1;font-weight:bold;padding:15px}
-.refresh{background:#302716;color:var(--gold);border-color:#725b2b}
-.warning{font-size:12px;line-height:1.6;color:#e9c879;background:#2a2113;border:1px solid #665126;padding:13px;border-radius:12px}
-.historyItem{display:flex;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px solid var(--border);font-size:13px}
-.green{color:var(--green)}
-.red{color:var(--red)}
-@media(max-width:550px){body{padding:10px}.metrics{grid-template-columns:1fr 1fr}}
+* { box-sizing:border-box; }
+body {
+margin:0; padding:15px; background:var(--bg);
+color:var(--text); font-family:Arial,sans-serif;
+}
+.app { max-width:850px; margin:auto; }
+header {
+display:flex; justify-content:space-between;
+align-items:center; gap:10px; margin-bottom:20px;
+flex-wrap:wrap;
+}
+.logo { font-size:28px; font-weight:900; }
+.logo span { color:var(--gold); }
+.badge {
+font-size:11px; padding:8px 11px; border-radius:20px;
+background:#302716; color:var(--gold);
+}
+.card {
+background:var(--card); border:1px solid var(--border);
+border-radius:17px; padding:18px; margin-bottom:15px;
+}
+label { color:var(--muted); font-size:11px; }
+.price {
+font-size:clamp(34px,9vw,52px);
+font-weight:800; margin:18px 0;
+}
+.metrics {
+display:grid; grid-template-columns:repeat(3,1fr);
+gap:10px; margin-top:20px;
+}
+.metric {
+background:#192333; padding:14px; border-radius:10px;
+min-width:0;
+}
+.metric strong {
+display:block; font-size:17px; margin-top:9px;
+overflow-wrap:anywhere;
+}
+.muted { color:var(--muted); font-size:12px; line-height:1.6; }
+.status { font-size:13px; margin-top:10px; }
+button {
+background:#302716; color:var(--gold);
+border:1px solid #725b2b; border-radius:10px;
+padding:12px 18px; cursor:pointer; margin-top:15px;
+}
+canvas { width:100%; height:220px; display:block; margin-top:15px; }
+@media(max-width:550px) {
+body { padding:10px; }
+.metrics { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
 <main class="app">
-
 <header>
 <div class="logo">GOLD <span>AI</span></div>
-<div class="badge">DONNÉES DE MARCHÉ · DÉMO</div>
+<div class="badge">RAISEFX · MT5 DÉMO</div>
 </header>
 
 <section class="card">
-<div class="row">
-<div>
-<label>ACTIF</label>
-<select id="asset">
-<option value="XAUUSD">XAUUSD · GOLD</option>
-<option value="EURUSD">EUR/USD</option>
-<option value="GBPUSD">GBP/USD</option>
-<option value="BTCUSD">BTC/USD</option>
-<option value="ETHUSD">ETH/USD</option>
-</select>
-</div>
-<div>
-<label>UNITÉ DE TEMPS</label>
-<select id="timeframe">
-<option value="1m">M1</option>
-<option value="5m">M5</option>
-<option value="15m">M15</option>
-<option value="1h">H1</option>
-</select>
-</div>
-</div>
+<label>ACTIF CONNECTÉ</label>
+<h2>XAUUSD · GOLD</h2>
 
-<div class="muted" style="margin-top:20px">DERNIER COURS REÇU</div>
+<div class="muted">DERNIER COURS REÇU</div>
 <div class="price" id="price">--</div>
-<div class="status" id="connection">Connexion en cours...</div>
+<div class="status" id="status">Connexion en cours...</div>
 
 <div class="metrics">
-<div class="metric"><label>BID</label><strong id="bid">--</strong></div>
-<div class="metric"><label>ASK</label><strong id="ask">--</strong></div>
-<div class="metric"><label>SPREAD</label><strong id="spread">--</strong></div>
+<div class="metric">
+<label>BID</label>
+<strong id="bid">--</strong>
 </div>
-<div class="muted" style="margin-top:12px" id="quoteTime">Dernière cotation : --</div>
-<div class="muted" id="source">Source : BiQuote</div>
+<div class="metric">
+<label>ASK</label>
+<strong id="ask">--</strong>
+</div>
+<div class="metric">
+<label>SPREAD</label>
+<strong id="spread">--</strong>
+</div>
+</div>
+
+<p class="muted" id="time">Dernière réception : --</p>
+<p class="muted">Source : ton MT5 RaiseFX</p>
+<button id="refresh">↻ ACTUALISER</button>
 </section>
 
 <section class="card">
-<div class="row">
-<strong>Graphique en chandeliers</strong>
-<span class="badge" id="chartLabel">XAUUSD · M1</span>
-</div>
+<strong>Évolution du cours reçu</strong>
 <canvas id="chart"></canvas>
-<div class="muted" id="candleStatus">Chargement des bougies...</div>
+<p class="muted">Historique des cotations reçues depuis l'ouverture de cette page.</p>
 </section>
-
-<section class="card">
-<div class="row">
-<strong>GOLD AI · Analyse automatique</strong>
-<span class="badge">TECHNIQUE</span>
-</div>
-
-<div class="signal">
-<div class="muted">INDICATION</div>
-<strong class="waitText" id="signal">EN ATTENTE</strong>
-<div class="muted" id="reason">En attente des données du marché.</div>
-<div class="muted" style="margin-top:10px" id="signalTime">--</div>
-</div>
-
-<div class="metrics">
-<div class="metric"><label>RSI (14)</label><strong id="rsi">--</strong></div>
-<div class="metric"><label>SMA 9</label><strong id="sma9">--</strong></div>
-<div class="metric"><label>SMA 21</label><strong id="sma21">--</strong></div>
-</div>
-
-<div class="actions">
-<button class="refresh" id="refresh">↻ ACTUALISER</button>
-<button id="auto">AUTO : ACTIVÉ</button>
-</div>
-</section>
-
-<section class="card">
-<div class="row">
-<strong>Historique des indications</strong>
-<span class="muted" id="historyCount">0 signal</span>
-</div>
-<div id="history" style="margin-top:10px">
-<div class="muted" style="padding:12px">Aucun signal.</div>
-</div>
-</section>
-
-<div class="warning">
-IMPORTANT : les cotations et bougies proviennent de BiQuote, pas directement de ton compte RaiseFX. Les prix peuvent différer de MT5. Les indications BUY/SELL sont expérimentales et ne garantissent aucun résultat. Le système n'envoie aucun ordre. Si le marché est fermé, si les données sont anciennes ou si la connexion échoue, aucun nouveau signal ne sera produit.
-</div>
-
 </main>
 
 <script>
-const API = "https://biquote.io";
+const API = "/api/tick";
 const $ = id => document.getElementById(id);
+let prices = [];
+let busy = false;
 
-const digits = {
-XAUUSD:2,
-EURUSD:5,
-GBPUSD:5,
-BTCUSD:2,
-ETHUSD:2
-};
-
-let bars = [];
-let history = [];
-let currentTick = null;
-let autoEnabled = true;
-let lastSignalKey = "";
-let connection = null;
-let refreshBusy = false;
-
-function formatPrice(value) {
-if (!Number.isFinite(Number(value))) return "--";
+function number(value) {
 return Number(value).toLocaleString("en-US", {
-minimumFractionDigits:digits[$("asset").value] || 2,
-maximumFractionDigits:digits[$("asset").value] || 2
-});
-}
-
-function setStatus(message,color="var(--gold)") {
-$("connection").textContent = "● " + message;
-$("connection").style.color = color;
-}
-
-function marketIsUsable(tick) {
-if (!tick) return false;
-
-const age = Number(tick.quoteAgeSeconds);
-const timestamp = Date.parse(tick.timestamp);
-const calculatedAge = Number.isFinite(timestamp)
-? (Date.now()-timestamp)/1000
-: Infinity;
-
-return tick.marketState === "open" &&
-tick.stale === false &&
-Number.isFinite(age) &&
-age <= 60 &&
-Number.isFinite(calculatedAge) &&
-calculatedAge >= -10 &&
-calculatedAge <= 90;
-}
-
-function showTick(tick) {
-currentTick = tick;
-
-$("price").textContent = formatPrice(tick.mid);
-$("bid").textContent = formatPrice(tick.bid);
-$("ask").textContent = formatPrice(tick.ask);
-$("spread").textContent = formatPrice(tick.spread);
-
-const timestamp = Date.parse(tick.timestamp);
-$("quoteTime").textContent = Number.isFinite(timestamp)
-? "Dernière cotation : " + new Date(timestamp).toLocaleString("fr-FR")
-: "Horodatage indisponible";
-
-$("source").textContent = "Source : " + (tick.source || "BiQuote");
-
-if (tick.marketState === "closed") {
-setStatus("MARCHÉ FERMÉ — DERNIER COURS UNIQUEMENT","var(--gold)");
-blockSignals("Le marché est fermé. Aucun nouveau signal.");
-} else if (!marketIsUsable(tick)) {
-setStatus("COTATION TROP ANCIENNE — PAS DE SIGNAL","var(--red)");
-blockSignals("La cotation est trop ancienne ou son horodatage est invalide.");
-} else {
-setStatus("COURS EN DIRECT · "+tick.quoteAgeSeconds+" s","var(--green)");
-analyse();
-}
-}
-
-async function loadTick() {
-try {
-const symbol = $("asset").value;
-const response = await fetch(`${API}/api/${symbol}`, {
-cache:"no-store"
-});
-
-if (!response.ok) throw new Error("Réponse API : "+response.status);
-
-const tick = await response.json();
-
-if (tick.symbol !== symbol ||
-!Number.isFinite(Number(tick.mid)) ||
-!Number.isFinite(Number(tick.bid)) ||
-!Number.isFinite(Number(tick.ask))) {
-throw new Error("Format de cotation invalide");
-}
-
-showTick(tick);
-} catch(error) {
-setStatus("CONNEXION IMPOSSIBLE : "+error.message,"var(--red)");
-blockSignals("Aucune cotation vérifiée. Pas de nouveau signal.");
-}
-}
-
-async function loadCandles() {
-try {
-const symbol = $("asset").value;
-const interval = $("timeframe").value;
-
-const response = await fetch(
-`${API}/api/${symbol}/ohlc?interval=${interval}&limit=100`,
-{cache:"no-store"}
-);
-
-if (!response.ok) throw new Error("Bougies indisponibles : "+response.status);
-
-const data = await response.json();
-
-if (!Array.isArray(data.bars) || data.symbol !== symbol) {
-throw new Error("Réponse de bougies invalide");
-}
-
-bars = data.bars
-.filter(b =>
-Number.isFinite(Number(b.open)) &&
-Number.isFinite(Number(b.high)) &&
-Number.isFinite(Number(b.low)) &&
-Number.isFinite(Number(b.close)) &&
-Number.isFinite(Date.parse(b.openTime))
-)
-.sort((a,b)=>Date.parse(a.openTime)-Date.parse(b.openTime));
-
-if (bars.length < 30) throw new Error("Historique insuffisant");
-
-$("chartLabel").textContent = symbol+" · "+interval.toUpperCase();
-$("candleStatus").textContent =
-bars.length+" bougies reçues · source BiQuote";
-
-drawChart();
-analyse();
-} catch(error) {
-bars = [];
-drawChart();
-$("candleStatus").textContent = error.message;
-blockSignals("Impossible de vérifier les bougies. Aucun signal.");
-}
-}
-
-function average(values,period) {
-if (values.length < period) return null;
-const sample = values.slice(-period);
-return sample.reduce((a,b)=>a+b,0)/period;
-}
-
-function calculateRSI(values,period=14) {
-if (values.length <= period) return null;
-
-let gains=0;
-let losses=0;
-
-for (let i=values.length-period;i<values.length;i++) {
-const diff=values[i]-values[i-1];
-if (diff>0) gains+=diff;
-else losses-=diff;
-}
-
-if (losses===0) return 100;
-
-const rs=gains/losses;
-return 100-(100/(1+rs));
-}
-
-function analyse() {
-if (!autoEnabled) return;
-
-if (!marketIsUsable(currentTick)) {
-blockSignals("Marché fermé ou cotation non vérifiée.");
-return;
-}
-
-const closedBars=bars.filter(b=>b.isOpen!==true);
-
-if (closedBars.length<30) {
-blockSignals("Pas assez de bougies clôturées.");
-return;
-}
-
-const closes=closedBars.map(b=>Number(b.close));
-const sma9=average(closes,9);
-const sma21=average(closes,21);
-const rsi=calculateRSI(closes,14);
-
-if (sma9===null || sma21===null || rsi===null) {
-blockSignals("Données insuffisantes.");
-return;
-}
-
-$("rsi").textContent=rsi.toFixed(1);
-$("sma9").textContent=formatPrice(sma9);
-$("sma21").textContent=formatPrice(sma21);
-
-const previous=closes[closes.length-2];
-const current=closes[closes.length-1];
-
-let signal="NO TRADE";
-let reason="Les conditions ne sont pas suffisamment alignées.";
-
-const bullish =
-sma9>sma21 &&
-current>sma9 &&
-current>previous &&
-rsi>=52 &&
-rsi<=67;
-
-const bearish =
-sma9<sma21 &&
-current<sma9 &&
-current<previous &&
-rsi<=48 &&
-rsi>=33;
-
-if (bullish) {
-signal="BUY";
-reason="Tendance et momentum haussiers détectés.";
-} else if (bearish) {
-signal="SELL";
-reason="Tendance et momentum baissiers détectés.";
-}
-
-const lastBar=closedBars[closedBars.length-1];
-const key=$("asset").value+"-"+$("timeframe").value+"-"+lastBar.openTime;
-
-displaySignal(signal,reason,key);
-}
-
-function blockSignals(reason) {
-$("signal").textContent="NO TRADE";
-$("signal").className="waitText";
-$("reason").textContent=reason;
-$("signalTime").textContent="Analyse : "+new Date().toLocaleTimeString("fr-FR");
-}
-
-function displaySignal(signal,reason,key) {
-$("signal").textContent=signal;
-$("signal").className=
-signal==="BUY"?"buyText":
-signal==="SELL"?"sellText":"waitText";
-
-$("reason").textContent=reason;
-$("signalTime").textContent="Analyse : "+new Date().toLocaleString("fr-FR");
-
-if (signal!=="NO TRADE" && key && key!==lastSignalKey) {
-lastSignalKey=key;
-
-history.unshift({
-signal,
-asset:$("asset").value,
-timeframe:$("timeframe").value.toUpperCase(),
-time:new Date().toLocaleTimeString("fr-FR")
-});
-
-history=history.slice(0,30);
-renderHistory();
-}
-}
-
-function renderHistory() {
-$("historyCount").textContent=history.length+" signal(s)";
-$("history").replaceChildren();
-
-if (!history.length) {
-$("history").innerHTML='<div class="muted" style="padding:12px">Aucun signal.</div>';
-return;
-}
-
-history.forEach(item=>{
-const row=document.createElement("div");
-row.className="historyItem";
-
-const left=document.createElement("span");
-left.textContent=item.asset+" · "+item.timeframe+" · "+item.time;
-
-const right=document.createElement("strong");
-right.textContent=item.signal;
-right.className=item.signal==="BUY"?"green":"red";
-
-row.append(left,right);
-$("history").append(row);
+minimumFractionDigits:2,
+maximumFractionDigits:2
 });
 }
 
 function drawChart() {
-const canvas=$("chart");
-const width=canvas.clientWidth;
-const height=canvas.clientHeight;
-const ratio=window.devicePixelRatio||1;
+const canvas = $("chart");
+const width = canvas.clientWidth;
+const height = canvas.clientHeight;
+const ratio = window.devicePixelRatio || 1;
 
-canvas.width=width*ratio;
-canvas.height=height*ratio;
+canvas.width = width * ratio;
+canvas.height = height * ratio;
 
-const ctx=canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
 ctx.setTransform(ratio,0,0,ratio,0,0);
 ctx.clearRect(0,0,width,height);
 
-if (!bars.length) return;
+if (prices.length < 2) return;
 
-const visible=bars.slice(-55);
-const values=visible.flatMap(b=>[Number(b.high),Number(b.low)]);
-const min=Math.min(...values);
-const max=Math.max(...values);
-const range=max-min||1;
+const min = Math.min(...prices);
+const max = Math.max(...prices);
+const range = max-min || 1;
 
-const y=v=>height-12-((v-min)/range)*(height-24);
-const step=width/visible.length;
-const body=Math.max(3,step*.58);
-
-ctx.strokeStyle="#29364a";
-for(let i=1;i<4;i++) {
-const yy=height*i/4;
+ctx.strokeStyle = "#e8bd59";
+ctx.lineWidth = 2;
 ctx.beginPath();
-ctx.moveTo(0,yy);
-ctx.lineTo(width,yy);
-ctx.stroke();
-}
 
-visible.forEach((c,i)=>{
-const x=i*step+step/2;
-const rising=Number(c.close)>=Number(c.open);
-const color=rising?"#20d49a":"#ff6474";
-
-ctx.strokeStyle=color;
-ctx.fillStyle=color;
-ctx.beginPath();
-ctx.moveTo(x,y(Number(c.high)));
-ctx.lineTo(x,y(Number(c.low)));
-ctx.stroke();
-
-const top=Math.min(y(Number(c.open)),y(Number(c.close)));
-const bodyHeight=Math.max(2,Math.abs(y(Number(c.open))-y(Number(c.close))));
-ctx.fillRect(x-body/2,top,body,bodyHeight);
+prices.forEach((value,index) => {
+const x = index/(prices.length-1)*width;
+const y = height-10-((value-min)/range)*(height-20);
+if (index === 0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
 });
+
+ctx.stroke();
 }
 
-async function refreshAll() {
-if (refreshBusy) return;
-refreshBusy=true;
-$("refresh").textContent="CHARGEMENT...";
-
-await Promise.all([loadTick(),loadCandles()]);
-
-$("refresh").textContent="↻ ACTUALISER";
-refreshBusy=false;
-}
-
-async function startLiveConnection() {
-if (!window.signalR) {
-setStatus("FLUX DIRECT INDISPONIBLE — MODE ACTUALISATION","var(--gold)");
-return;
-}
+async function loadTick() {
+if (busy) return;
+busy = true;
 
 try {
-connection=new signalR.HubConnectionBuilder()
-.withUrl(`${API}/hubs/tick`)
-.withAutomaticReconnect()
-.build();
+const response = await fetch(API + "?t=" + Date.now(), {
+cache:"no-store"
+});
 
-connection.on("ReceiveTick",tick=>{
-if (tick.symbol===$("asset").value) {
-showTick(tick);
+if (!response.ok) throw new Error("Erreur serveur " + response.status);
+
+const data = await response.json();
+const tick = data.tick;
+
+if (!tick || !Number.isFinite(Number(tick.bid)) ||
+!Number.isFinite(Number(tick.ask))) {
+throw new Error("Aucune cotation reçue");
 }
-});
 
-connection.onreconnected(async()=>{
-await connection.invoke("Subscribe",[$("asset").value]);
-await loadTick();
-});
+const bid = Number(tick.bid);
+const ask = Number(tick.ask);
+const mid = (bid+ask)/2;
 
-await connection.start();
-await connection.invoke("Subscribe",[$("asset").value]);
-await loadTick();
+$("price").textContent = number(mid);
+$("bid").textContent = number(bid);
+$("ask").textContent = number(ask);
+$("spread").textContent = number(ask-bid);
+
+const received = Number(tick.receivedAt);
+const age = Number.isFinite(received)
+? Math.max(0,Math.floor((Date.now()-received)/1000))
+: null;
+
+$("time").textContent = "Dernière réception : " +
+(age === null ? "indisponible" : age + " seconde(s) auparavant");
+
+if (age !== null && age <= 5) {
+$("status").textContent = "● CONNECTÉ · PRIX MT5";
+$("status").style.color = "var(--green)";
+} else {
+$("status").textContent = "● COTATION ANCIENNE";
+$("status").style.color = "var(--red)";
+}
+
+prices.push(mid);
+if (prices.length > 60) prices.shift();
+drawChart();
+
 } catch(error) {
-setStatus("FLUX DIRECT NON DISPONIBLE — ACTUALISATION DE SECOURS","var(--gold)");
+$("status").textContent = "● " + error.message;
+$("status").style.color = "var(--red)";
+} finally {
+busy = false;
 }
 }
 
-async function changeAsset() {
-if (connection && connection.state==="Connected") {
-try {
-await connection.invoke("Unsubscribe",[$("asset").value]);
-} catch(e) {}
-}
-
-bars=[];
-history=[];
-lastSignalKey="";
-currentTick=null;
-renderHistory();
-blockSignals("Chargement du nouvel actif.");
-
-if (connection && connection.state==="Connected") {
-try {
-await connection.invoke("Subscribe",[$("asset").value]);
-} catch(e) {}
-}
-
-await refreshAll();
-}
-
-$("asset").addEventListener("change",changeAsset);
-
-$("timeframe").addEventListener("change",async()=>{
-bars=[];
-lastSignalKey="";
-blockSignals("Chargement de la nouvelle unité de temps.");
-await loadCandles();
-});
-
-$("refresh").addEventListener("click",refreshAll);
-
-$("auto").addEventListener("click",()=>{
-autoEnabled=!autoEnabled;
-$("auto").textContent=autoEnabled?"AUTO : ACTIVÉ":"AUTO : DÉSACTIVÉ";
-
-if (autoEnabled) analyse();
-else blockSignals("Analyse automatique désactivée.");
-});
-
+$("refresh").addEventListener("click",loadTick);
 window.addEventListener("resize",drawChart);
 
-refreshAll();
-startLiveConnection();
-
-setInterval(()=>{
-if (!connection || connection.state!=="Connected") loadTick();
-},15000);
-
-setInterval(loadCandles,60000);
+loadTick();
+setInterval(loadTick,1000);
 </script>
 </body>
 </html>
