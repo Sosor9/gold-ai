@@ -6,37 +6,55 @@
 <title>GOLD AI</title>
 <style>
 :root {
---bg:#080b12;--card:#111824;--gold:#e8bd59;
---green:#20d49a;--red:#ff6474;--text:#f4f6fa;
---muted:#8995a8;--border:#29364a;
+--bg:#080b12;
+--card:#111824;
+--gold:#e8bd59;
+--green:#20d49a;
+--red:#ff6474;
+--text:#f4f6fa;
+--muted:#8995a8;
+--border:#29364a;
 }
 *{box-sizing:border-box}
 body{margin:0;padding:15px;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-.app{max-width:900px;margin:auto}
-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.logo{font-size:28px;font-weight:900}
+.app{max-width:950px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.logo{font-size:29px;font-weight:900}
 .logo span{color:var(--gold)}
-.badge{font-size:11px;padding:8px 11px;border-radius:20px;background:#302716;color:var(--gold)}
+.badge{font-size:11px;padding:9px 12px;border-radius:20px;background:#302716;color:var(--gold)}
 .card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:18px;margin-bottom:15px}
-label{color:var(--muted);font-size:11px}
-.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.price{font-size:clamp(34px,9vw,52px);font-weight:800;margin:15px 0}
-.signal{min-width:125px;text-align:center;padding:13px;border-radius:12px;background:#192333}
-.signal strong{display:block;font-size:21px;margin-top:5px}
-.signal small{color:var(--muted)}
+label{font-size:11px;color:var(--muted)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.price{font-size:clamp(35px,9vw,52px);font-weight:800;margin:13px 0}
+.signal-box{text-align:center;background:#192333;border:1px solid var(--border);border-radius:14px;padding:15px;min-width:145px}
+.signal{font-size:25px;font-weight:900;margin:8px 0}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
 .metric{background:#192333;padding:14px;border-radius:10px;min-width:0}
-.metric strong{display:block;font-size:17px;margin-top:9px;overflow-wrap:anywhere}
+.metric strong{display:block;font-size:18px;margin-top:8px;overflow-wrap:anywhere}
 .muted{color:var(--muted);font-size:12px;line-height:1.6}
 .status{font-size:13px;margin-top:10px}
-button,select{background:#302716;color:var(--gold);border:1px solid #725b2b;border-radius:10px;padding:12px 16px;font-size:14px}
-button{cursor:pointer;font-weight:bold}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
-select{background:#192333;color:var(--text);border-color:var(--border)}
-.analysis{margin-top:15px;padding:14px;border-radius:10px;background:#192333;line-height:1.6}
-.history{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+button,select{padding:13px 17px;border-radius:10px;font-size:14px}
+button{background:#302716;color:var(--gold);border:1px solid #725b2b;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
+select{background:#192333;color:white;border:1px solid var(--border)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.analyse-btn{background:var(--gold);color:#111;border:0;min-width:145px}
+.analysis{background:#192333;border-radius:12px;padding:16px;margin-top:15px;line-height:1.7}
+.loader{display:none;margin-top:15px}
+.loader.active{display:block}
+.progress{height:5px;background:#303a4c;border-radius:10px;overflow:hidden;margin-top:12px}
+.progress span{display:block;height:100%;width:0;background:var(--gold);animation:loading 5s ease-in-out infinite}
+@keyframes loading{0%{width:0}80%{width:90%}100%{width:100%}}
+.indicators{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
+.indicator{background:#192333;border-radius:10px;padding:13px}
+.indicator strong{display:block;margin-top:7px}
+.history{padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
 canvas{width:100%;height:220px;display:block;margin-top:15px}
-@media(max-width:550px){body{padding:10px}.metrics{grid-template-columns:1fr 1fr}}
+@media(max-width:550px){
+body{padding:10px}
+.metrics{grid-template-columns:1fr 1fr}
+.indicators{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -51,13 +69,13 @@ canvas{width:100%;height:220px;display:block;margin-top:15px}
 <div>
 <label>ACTIF CONNECTÉ</label>
 <h2>XAUUSD · GOLD</h2>
-<div class="muted">DERNIER COURS REÇU</div>
+<label>DERNIER COURS REÇU</label>
 <div class="price" id="price">--</div>
 </div>
-<div class="signal">
-<small>SIGNAL</small>
-<strong id="signal">⚪ WAIT</strong>
-<small id="signalTime">En attente</small>
+<div class="signal-box">
+<label>DERNIER SIGNAL</label>
+<div class="signal" id="signal">⚪ WAIT</div>
+<small id="signalTime" class="muted">En attente</small>
 </div>
 </div>
 
@@ -68,14 +86,15 @@ canvas{width:100%;height:220px;display:block;margin-top:15px}
 <div class="metric"><label>ASK</label><strong id="ask">--</strong></div>
 <div class="metric"><label>SPREAD</label><strong id="spread">--</strong></div>
 </div>
-
 <p class="muted" id="time">Dernière réception : --</p>
-<p class="muted">Source : ton MT5 RaiseFX</p>
 </section>
 
 <section class="card">
-<h3>Analyse XAUUSD</h3>
-<label>UNITÉ DE TEMPS</label>
+<div class="topline">
+<div>
+<h3>GOLD AI · ANALYSE INTELLIGENTE</h3>
+<p class="muted">Analyse technique expérimentale du XAUUSD</p>
+</div>
 <div class="controls">
 <select id="timeframe">
 <option value="60">M1</option>
@@ -83,23 +102,39 @@ canvas{width:100%;height:220px;display:block;margin-top:15px}
 <option value="900">M15</option>
 <option value="3600">H1</option>
 </select>
-<button id="analyze">ANALYSER</button>
+<button class="analyse-btn" id="analyze">⚡ ANALYSER</button>
+</div>
 </div>
 
-<div class="analysis" id="analysis">
-Choisis une unité de temps et appuie sur ANALYSER.
+<div class="loader" id="loader">
+<strong>GOLD AI analyse le marché...</strong>
+<p class="muted" id="loadingText">Étude des données disponibles...</p>
+<div class="progress"><span></span></div>
 </div>
-<p class="muted">Analyse expérimentale basée sur les cotations reçues depuis l'ouverture de cette page.</p>
+
+<div class="analysis" id="analysis" aria-live="polite">
+Sélectionne une unité de temps puis lance une analyse.
+</div>
+
+<div class="indicators">
+<div class="indicator"><label>EMA 20</label><strong id="ema20">--</strong></div>
+<div class="indicator"><label>EMA 50</label><strong id="ema50">--</strong></div>
+<div class="indicator"><label>RSI 14</label><strong id="rsi">--</strong></div>
+<div class="indicator"><label>MACD</label><strong id="macd">--</strong></div>
+<div class="indicator"><label>BOLLINGER</label><strong id="bollinger">--</strong></div>
+<div class="indicator"><label>VOLATILITÉ</label><strong id="volatility">--</strong></div>
+</div>
+<p class="muted" id="confidence"></p>
+<p class="muted">Les indicateurs calculés ici utilisent les prix collectés pendant l'ouverture de cette page. Ils ne remplacent pas les véritables bougies OHLC historiques de MT5.</p>
 </section>
 
 <section class="card">
-<strong>Évolution du cours reçu</strong>
+<h3>Évolution du cours</h3>
 <canvas id="chart"></canvas>
-<p class="muted">Historique des prix observés depuis l'ouverture de cette page.</p>
 </section>
 
 <section class="card">
-<h3>Historique des signaux</h3>
+<h3>Historique des analyses</h3>
 <div id="history" class="muted">Aucune analyse effectuée.</div>
 </section>
 </main>
@@ -110,12 +145,54 @@ const $=id=>document.getElementById(id);
 let prices=[];
 let busy=false;
 let lastMid=null;
-let signals=[];
+let history=[];
+let lastTick=null;
 
-function number(value){
-return Number(value).toLocaleString("en-US",{
-minimumFractionDigits:2,maximumFractionDigits:2
+function fmt(n){
+return Number(n).toLocaleString("en-US",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
 });
+}
+
+function ema(values,period){
+if(values.length<period)return null;
+let result=values.slice(0,period).reduce((a,b)=>a+b,0)/period;
+const multiplier=2/(period+1);
+for(let i=period;i<values.length;i++){
+result=(values[i]-result)*multiplier+result;
+}
+return result;
+}
+
+function rsi(values,period=14){
+if(values.length<=period)return null;
+let gains=0,losses=0;
+for(let i=values.length-period;i<values.length;i++){
+const diff=values[i]-values[i-1];
+if(diff>0)gains+=diff;
+else losses-=diff;
+}
+const avgGain=gains/period;
+const avgLoss=losses/period;
+if(avgLoss===0)return 100;
+return 100-(100/(1+avgGain/avgLoss));
+}
+
+function calculateMACD(values){
+if(values.length<35)return null;
+const short=ema(values,12);
+const long=ema(values,26);
+return short-long;
+}
+
+function bollinger(values,period=20){
+if(values.length<period)return null;
+const sample=values.slice(-period);
+const mean=sample.reduce((a,b)=>a+b,0)/period;
+const variance=sample.reduce((a,b)=>a+Math.pow(b-mean,2),0)/period;
+const deviation=Math.sqrt(variance);
+return {upper:mean+2*deviation,lower:mean-2*deviation,mean};
 }
 
 function drawChart(){
@@ -128,20 +205,21 @@ canvas.height=height*ratio;
 const ctx=canvas.getContext("2d");
 ctx.setTransform(ratio,0,0,ratio,0,0);
 ctx.clearRect(0,0,width,height);
-if(prices.length<2)return;
 
+if(prices.length<2)return;
 const values=prices.map(p=>p.value);
 const min=Math.min(...values);
 const max=Math.max(...values);
 const range=max-min||1;
+
 ctx.strokeStyle="#e8bd59";
 ctx.lineWidth=2;
 ctx.beginPath();
 
-values.forEach((value,index)=>{
-const x=index/(values.length-1)*width;
-const y=height-10-((value-min)/range)*(height-20);
-if(index===0)ctx.moveTo(x,y);
+values.forEach((v,i)=>{
+const x=i/(values.length-1)*width;
+const y=height-10-((v-min)/range)*(height-20);
+if(i===0)ctx.moveTo(x,y);
 else ctx.lineTo(x,y);
 });
 ctx.stroke();
@@ -156,25 +234,30 @@ if(!response.ok)throw new Error("Erreur serveur "+response.status);
 const data=await response.json();
 const tick=data.tick;
 
-if(!tick||!Number.isFinite(Number(tick.bid))||!Number.isFinite(Number(tick.ask))){
+if(!tick||!Number.isFinite(Number(tick.bid))||
+!Number.isFinite(Number(tick.ask))){
 throw new Error("Aucune cotation reçue");
 }
 
 const bid=Number(tick.bid);
 const ask=Number(tick.ask);
 const mid=(bid+ask)/2;
+lastTick=tick;
 
-$("price").textContent=number(mid);
-$("bid").textContent=number(bid);
-$("ask").textContent=number(ask);
-$("spread").textContent=number(ask-bid);
+$("price").textContent=fmt(mid);
+$("bid").textContent=fmt(bid);
+$("ask").textContent=fmt(ask);
+$("spread").textContent=fmt(ask-bid);
 
 const received=Number(tick.receivedAt);
-const age=Number.isFinite(received)?Math.max(0,Math.floor((Date.now()-received)/1000)):null;
-$("time").textContent="Dernière réception : "+(age===null?"indisponible":age+" seconde(s) auparavant");
+const age=Number.isFinite(received)?
+Math.max(0,Math.floor((Date.now()-received)/1000)):null;
+
+$("time").textContent="Dernière réception : "+
+(age===null?"indisponible":age+" seconde(s) auparavant");
 
 if(age!==null&&age<=5){
-$("status").textContent="● CONNECTÉ · PRIX MT5";
+$("status").textContent="● CONNECTÉ · MT5";
 $("status").style.color="var(--green)";
 }else{
 $("status").textContent="● COTATION ANCIENNE";
@@ -184,7 +267,7 @@ $("status").style.color="var(--red)";
 if(lastMid===null||mid!==lastMid){
 prices.push({value:mid,time:Date.now()});
 lastMid=mid;
-if(prices.length>4000)prices.shift();
+if(prices.length>10000)prices.shift();
 drawChart();
 }
 }catch(error){
@@ -195,57 +278,142 @@ busy=false;
 }
 }
 
-function analyze(){
-const seconds=Number($("timeframe").value);
+function runAnalysis(){
+const timeframe=Number($("timeframe").value);
 const now=Date.now();
-const relevant=prices.filter(p=>now-p.time<=seconds*1000);
+const selected=prices.filter(p=>now-p.time<=timeframe*1000);
+const values=selected.map(p=>p.value);
 
-if(relevant.length<2){
-$("analysis").textContent="Pas assez de données pour cette unité de temps. Laisse GOLD AI recevoir davantage de cotations avant de recommencer.";
-return;
+if(values.length<35){
+$("analysis").textContent=
+"Données insuffisantes : il faut collecter davantage de prix avant de calculer correctement les indicateurs. Laisse la page ouverte.";
+return null;
 }
 
-const first=relevant[0].value;
-const last=relevant[relevant.length-1].value;
-const change=last-first;
-const percent=Math.abs(change/first)*100;
-const threshold=0.00015;
+const e20=ema(values,20);
+const e50=ema(values,50);
+const rv=rsi(values,14);
+const mv=calculateMACD(values);
+const bb=bollinger(values);
+const current=values[values.length-1];
+
+const signals=[];
+if(e20!==null&&e50!==null){
+signals.push(e20>e50?1:-1);
+}
+if(rv!==null){
+if(rv>55)signals.push(1);
+else if(rv<45)signals.push(-1);
+else signals.push(0);
+}
+if(mv!==null){
+signals.push(mv>0?1:mv<0?-1:0);
+}
+if(bb){
+if(current>bb.mean)signals.push(1);
+else if(current<bb.mean)signals.push(-1);
+else signals.push(0);
+}
+
+const bullish=signals.filter(x=>x===1).length;
+const bearish=signals.filter(x=>x===-1).length;
+const total=signals.length;
+const strength=Math.max(bullish,bearish)/total*100;
 
 let result="NO TRADE";
 let arrow="⚪";
 let color="var(--muted)";
-let reason="Le mouvement observé ne montre pas de direction suffisamment nette.";
+let explanation="Les indicateurs ne donnent pas de direction suffisamment cohérente.";
 
-if(change/first>threshold){
+if(bullish>=3&&bullish>bearish){
 result="BUY";
 arrow="⬆️";
 color="var(--green)";
-reason="Le prix observé est en hausse sur la période sélectionnée.";
-}else if(change/first< -threshold){
+explanation="Les indicateurs disponibles montrent une majorité de signaux haussiers.";
+}else if(bearish>=3&&bearish>bullish){
 result="SELL";
 arrow="⬇️";
 color="var(--red)";
-reason="Le prix observé est en baisse sur la période sélectionnée.";
+explanation="Les indicateurs disponibles montrent une majorité de signaux baissiers.";
 }
+
+$("ema20").textContent=fmt(e20);
+$("ema50").textContent=fmt(e50);
+$("rsi").textContent=rv.toFixed(2);
+$("macd").textContent=mv.toFixed(4);
+$("bollinger").textContent=fmt(bb.lower)+" – "+fmt(bb.upper);
+
+const changes=[];
+for(let i=1;i<values.length;i++){
+changes.push(Math.abs(values[i]-values[i-1]));
+}
+const volatility=changes.reduce((a,b)=>a+b,0)/changes.length;
+$("volatility").textContent=fmt(volatility);
 
 $("signal").textContent=arrow+" "+result;
 $("signal").style.color=color;
 $("signalTime").textContent=new Date().toLocaleTimeString("fr-FR");
-$("analysis").innerHTML="<strong style='color:"+color+"'>"+arrow+" "+result+"</strong><br>"+reason+"<br>Variation observée : "+(change>=0?"+":"")+number(change)+" ("+percent.toFixed(3)+" %).<br>Unité : "+$("timeframe").selectedOptions[0].text;
 
-signals.unshift({
-result:result,
+$("analysis").innerHTML=
+"<strong style='color:"+color+"'>"+arrow+" "+result+"</strong><br>"+
+explanation+"<br>"+
+"Signaux haussiers : "+bullish+"<br>"+
+"Signaux baissiers : "+bearish+"<br>"+
+"Unité : "+$("timeframe").selectedOptions[0].text+"<br>"+
+"Données utilisées : "+values.length+" observations.";
+
+$("confidence").textContent=
+"Convergence des indicateurs : "+strength.toFixed(0)+
+" %. Ce pourcentage mesure uniquement leur accord, pas la probabilité de réussite du signal.";
+
+history.unshift({
+result,
 time:new Date().toLocaleTimeString("fr-FR"),
 timeframe:$("timeframe").selectedOptions[0].text
 });
-if(signals.length>10)signals.pop();
+history=history.slice(0,15);
 
-$("history").innerHTML=signals.map(s=>
-"<div class='history'><strong>"+s.result+"</strong> · "+s.timeframe+" · "+s.time+"</div>"
+$("history").innerHTML=history.map(item=>
+"<div class='history'><strong>"+item.result+"</strong> · "+
+item.timeframe+" · "+item.time+"</div>"
 ).join("");
+
+return result;
 }
 
-$("analyze").addEventListener("click",analyze);
+$("analyze").addEventListener("click",async()=>{
+const button=$("analyze");
+const loader=$("loader");
+button.disabled=true;
+button.textContent="ANALYSE...";
+loader.classList.add("active");
+
+const stages=[
+"Étude de la tendance...",
+"Calcul des indicateurs techniques...",
+"Vérification du momentum...",
+"Comparaison des signaux...",
+"Préparation du résultat..."
+];
+
+let stage=0;
+$("loadingText").textContent=stages[0];
+
+const interval=setInterval(()=>{
+stage=Math.min(stage+1,stages.length-1);
+$("loadingText").textContent=stages[stage];
+},900);
+
+await new Promise(resolve=>setTimeout(resolve,4500));
+
+clearInterval(interval);
+runAnalysis();
+
+loader.classList.remove("active");
+button.disabled=false;
+button.textContent="⚡ ANALYSER";
+});
+
 window.addEventListener("resize",drawChart);
 loadTick();
 setInterval(loadTick,250);
