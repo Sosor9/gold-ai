@@ -6,60 +6,37 @@
 <title>GOLD AI</title>
 <style>
 :root {
---bg:#080b12; --card:#111824; --gold:#e8bd59;
---green:#20d49a; --red:#ff6474; --text:#f4f6fa;
---muted:#8995a8; --border:#29364a;
+--bg:#080b12;--card:#111824;--gold:#e8bd59;
+--green:#20d49a;--red:#ff6474;--text:#f4f6fa;
+--muted:#8995a8;--border:#29364a;
 }
-* { box-sizing:border-box; }
-body {
-margin:0; padding:15px; background:var(--bg);
-color:var(--text); font-family:Arial,sans-serif;
-}
-.app { max-width:850px; margin:auto; }
-header {
-display:flex; justify-content:space-between;
-align-items:center; gap:10px; margin-bottom:20px;
-flex-wrap:wrap;
-}
-.logo { font-size:28px; font-weight:900; }
-.logo span { color:var(--gold); }
-.badge {
-font-size:11px; padding:8px 11px; border-radius:20px;
-background:#302716; color:var(--gold);
-}
-.card {
-background:var(--card); border:1px solid var(--border);
-border-radius:17px; padding:18px; margin-bottom:15px;
-}
-label { color:var(--muted); font-size:11px; }
-.price {
-font-size:clamp(34px,9vw,52px);
-font-weight:800; margin:18px 0;
-}
-.metrics {
-display:grid; grid-template-columns:repeat(3,1fr);
-gap:10px; margin-top:20px;
-}
-.metric {
-background:#192333; padding:14px; border-radius:10px;
-min-width:0;
-}
-.metric strong {
-display:block; font-size:17px; margin-top:9px;
-overflow-wrap:anywhere;
-}
-.muted { color:var(--muted); font-size:12px; line-height:1.6; }
-.status { font-size:13px; margin-top:10px; }
-button {
-background:#302716; color:var(--gold);
-border:1px solid #725b2b; border-radius:10px;
-padding:12px 18px; cursor:pointer; margin-top:15px;
-}
-canvas { width:100%; height:220px; display:block; margin-top:15px; }
-@media(max-width:550px) {
-body { padding:10px; }
-.metrics { grid-template-columns:1fr 1fr; }
-}
+*{box-sizing:border-box}
+body{margin:0;padding:15px;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+.app{max-width:900px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.logo{font-size:28px;font-weight:900}
+.logo span{color:var(--gold)}
+.badge{font-size:11px;padding:8px 11px;border-radius:20px;background:#302716;color:var(--gold)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:18px;margin-bottom:15px}
+label{color:var(--muted);font-size:11px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.price{font-size:clamp(34px,9vw,52px);font-weight:800;margin:15px 0}
+.signal{min-width:125px;text-align:center;padding:13px;border-radius:12px;background:#192333}
+.signal strong{display:block;font-size:21px;margin-top:5px}
+.signal small{color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.metric{background:#192333;padding:14px;border-radius:10px;min-width:0}
+.metric strong{display:block;font-size:17px;margin-top:9px;overflow-wrap:anywhere}
+.muted{color:var(--muted);font-size:12px;line-height:1.6}
+.status{font-size:13px;margin-top:10px}
+button,select{background:#302716;color:var(--gold);border:1px solid #725b2b;border-radius:10px;padding:12px 16px;font-size:14px}
+button{cursor:pointer;font-weight:bold}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+select{background:#192333;color:var(--text);border-color:var(--border)}
+.analysis{margin-top:15px;padding:14px;border-radius:10px;background:#192333;line-height:1.6}
+.history{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+canvas{width:100%;height:220px;display:block;margin-top:15px}
+@media(max-width:550px){body{padding:10px}.metrics{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -70,145 +47,206 @@ body { padding:10px; }
 </header>
 
 <section class="card">
+<div class="topline">
+<div>
 <label>ACTIF CONNECTÉ</label>
 <h2>XAUUSD · GOLD</h2>
-
 <div class="muted">DERNIER COURS REÇU</div>
 <div class="price" id="price">--</div>
+</div>
+<div class="signal">
+<small>SIGNAL</small>
+<strong id="signal">⚪ WAIT</strong>
+<small id="signalTime">En attente</small>
+</div>
+</div>
+
 <div class="status" id="status">Connexion en cours...</div>
 
 <div class="metrics">
-<div class="metric">
-<label>BID</label>
-<strong id="bid">--</strong>
-</div>
-<div class="metric">
-<label>ASK</label>
-<strong id="ask">--</strong>
-</div>
-<div class="metric">
-<label>SPREAD</label>
-<strong id="spread">--</strong>
-</div>
+<div class="metric"><label>BID</label><strong id="bid">--</strong></div>
+<div class="metric"><label>ASK</label><strong id="ask">--</strong></div>
+<div class="metric"><label>SPREAD</label><strong id="spread">--</strong></div>
 </div>
 
 <p class="muted" id="time">Dernière réception : --</p>
 <p class="muted">Source : ton MT5 RaiseFX</p>
-<button id="refresh">↻ ACTUALISER</button>
+</section>
+
+<section class="card">
+<h3>Analyse XAUUSD</h3>
+<label>UNITÉ DE TEMPS</label>
+<div class="controls">
+<select id="timeframe">
+<option value="60">M1</option>
+<option value="300">M5</option>
+<option value="900">M15</option>
+<option value="3600">H1</option>
+</select>
+<button id="analyze">ANALYSER</button>
+</div>
+
+<div class="analysis" id="analysis">
+Choisis une unité de temps et appuie sur ANALYSER.
+</div>
+<p class="muted">Analyse expérimentale basée sur les cotations reçues depuis l'ouverture de cette page.</p>
 </section>
 
 <section class="card">
 <strong>Évolution du cours reçu</strong>
 <canvas id="chart"></canvas>
-<p class="muted">Historique des cotations reçues depuis l'ouverture de cette page.</p>
+<p class="muted">Historique des prix observés depuis l'ouverture de cette page.</p>
+</section>
+
+<section class="card">
+<h3>Historique des signaux</h3>
+<div id="history" class="muted">Aucune analyse effectuée.</div>
 </section>
 </main>
 
 <script>
-const API = "/api/tick";
-const $ = id => document.getElementById(id);
-let prices = [];
-let busy = false;
+const API="/api/tick";
+const $=id=>document.getElementById(id);
+let prices=[];
+let busy=false;
+let lastMid=null;
+let signals=[];
 
-function number(value) {
-return Number(value).toLocaleString("en-US", {
-minimumFractionDigits:2,
-maximumFractionDigits:2
+function number(value){
+return Number(value).toLocaleString("en-US",{
+minimumFractionDigits:2,maximumFractionDigits:2
 });
 }
 
-function drawChart() {
-const canvas = $("chart");
-const width = canvas.clientWidth;
-const height = canvas.clientHeight;
-const ratio = window.devicePixelRatio || 1;
-
-canvas.width = width * ratio;
-canvas.height = height * ratio;
-
-const ctx = canvas.getContext("2d");
+function drawChart(){
+const canvas=$("chart");
+const width=canvas.clientWidth;
+const height=canvas.clientHeight;
+const ratio=window.devicePixelRatio||1;
+canvas.width=width*ratio;
+canvas.height=height*ratio;
+const ctx=canvas.getContext("2d");
 ctx.setTransform(ratio,0,0,ratio,0,0);
 ctx.clearRect(0,0,width,height);
+if(prices.length<2)return;
 
-if (prices.length < 2) return;
-
-const min = Math.min(...prices);
-const max = Math.max(...prices);
-const range = max-min || 1;
-
-ctx.strokeStyle = "#e8bd59";
-ctx.lineWidth = 2;
+const values=prices.map(p=>p.value);
+const min=Math.min(...values);
+const max=Math.max(...values);
+const range=max-min||1;
+ctx.strokeStyle="#e8bd59";
+ctx.lineWidth=2;
 ctx.beginPath();
 
-prices.forEach((value,index) => {
-const x = index/(prices.length-1)*width;
-const y = height-10-((value-min)/range)*(height-20);
-if (index === 0) ctx.moveTo(x,y);
+values.forEach((value,index)=>{
+const x=index/(values.length-1)*width;
+const y=height-10-((value-min)/range)*(height-20);
+if(index===0)ctx.moveTo(x,y);
 else ctx.lineTo(x,y);
 });
-
 ctx.stroke();
 }
 
-async function loadTick() {
-if (busy) return;
-busy = true;
+async function loadTick(){
+if(busy)return;
+busy=true;
+try{
+const response=await fetch(API+"?t="+Date.now(),{cache:"no-store"});
+if(!response.ok)throw new Error("Erreur serveur "+response.status);
+const data=await response.json();
+const tick=data.tick;
 
-try {
-const response = await fetch(API + "?t=" + Date.now(), {
-cache:"no-store"
-});
-
-if (!response.ok) throw new Error("Erreur serveur " + response.status);
-
-const data = await response.json();
-const tick = data.tick;
-
-if (!tick || !Number.isFinite(Number(tick.bid)) ||
-!Number.isFinite(Number(tick.ask))) {
+if(!tick||!Number.isFinite(Number(tick.bid))||!Number.isFinite(Number(tick.ask))){
 throw new Error("Aucune cotation reçue");
 }
 
-const bid = Number(tick.bid);
-const ask = Number(tick.ask);
-const mid = (bid+ask)/2;
+const bid=Number(tick.bid);
+const ask=Number(tick.ask);
+const mid=(bid+ask)/2;
 
-$("price").textContent = number(mid);
-$("bid").textContent = number(bid);
-$("ask").textContent = number(ask);
-$("spread").textContent = number(ask-bid);
+$("price").textContent=number(mid);
+$("bid").textContent=number(bid);
+$("ask").textContent=number(ask);
+$("spread").textContent=number(ask-bid);
 
-const received = Number(tick.receivedAt);
-const age = Number.isFinite(received)
-? Math.max(0,Math.floor((Date.now()-received)/1000))
-: null;
+const received=Number(tick.receivedAt);
+const age=Number.isFinite(received)?Math.max(0,Math.floor((Date.now()-received)/1000)):null;
+$("time").textContent="Dernière réception : "+(age===null?"indisponible":age+" seconde(s) auparavant");
 
-$("time").textContent = "Dernière réception : " +
-(age === null ? "indisponible" : age + " seconde(s) auparavant");
-
-if (age !== null && age <= 5) {
-$("status").textContent = "● CONNECTÉ · PRIX MT5";
-$("status").style.color = "var(--green)";
-} else {
-$("status").textContent = "● COTATION ANCIENNE";
-$("status").style.color = "var(--red)";
+if(age!==null&&age<=5){
+$("status").textContent="● CONNECTÉ · PRIX MT5";
+$("status").style.color="var(--green)";
+}else{
+$("status").textContent="● COTATION ANCIENNE";
+$("status").style.color="var(--red)";
 }
 
-prices.push(mid);
-if (prices.length > 60) prices.shift();
+if(lastMid===null||mid!==lastMid){
+prices.push({value:mid,time:Date.now()});
+lastMid=mid;
+if(prices.length>4000)prices.shift();
 drawChart();
-
-} catch(error) {
-$("status").textContent = "● " + error.message;
-$("status").style.color = "var(--red)";
-} finally {
-busy = false;
+}
+}catch(error){
+$("status").textContent="● "+error.message;
+$("status").style.color="var(--red)";
+}finally{
+busy=false;
 }
 }
 
-$("refresh").addEventListener("click",loadTick);
+function analyze(){
+const seconds=Number($("timeframe").value);
+const now=Date.now();
+const relevant=prices.filter(p=>now-p.time<=seconds*1000);
+
+if(relevant.length<2){
+$("analysis").textContent="Pas assez de données pour cette unité de temps. Laisse GOLD AI recevoir davantage de cotations avant de recommencer.";
+return;
+}
+
+const first=relevant[0].value;
+const last=relevant[relevant.length-1].value;
+const change=last-first;
+const percent=Math.abs(change/first)*100;
+const threshold=0.00015;
+
+let result="NO TRADE";
+let arrow="⚪";
+let color="var(--muted)";
+let reason="Le mouvement observé ne montre pas de direction suffisamment nette.";
+
+if(change/first>threshold){
+result="BUY";
+arrow="⬆️";
+color="var(--green)";
+reason="Le prix observé est en hausse sur la période sélectionnée.";
+}else if(change/first< -threshold){
+result="SELL";
+arrow="⬇️";
+color="var(--red)";
+reason="Le prix observé est en baisse sur la période sélectionnée.";
+}
+
+$("signal").textContent=arrow+" "+result;
+$("signal").style.color=color;
+$("signalTime").textContent=new Date().toLocaleTimeString("fr-FR");
+$("analysis").innerHTML="<strong style='color:"+color+"'>"+arrow+" "+result+"</strong><br>"+reason+"<br>Variation observée : "+(change>=0?"+":"")+number(change)+" ("+percent.toFixed(3)+" %).<br>Unité : "+$("timeframe").selectedOptions[0].text;
+
+signals.unshift({
+result:result,
+time:new Date().toLocaleTimeString("fr-FR"),
+timeframe:$("timeframe").selectedOptions[0].text
+});
+if(signals.length>10)signals.pop();
+
+$("history").innerHTML=signals.map(s=>
+"<div class='history'><strong>"+s.result+"</strong> · "+s.timeframe+" · "+s.time+"</div>"
+).join("");
+}
+
+$("analyze").addEventListener("click",analyze);
 window.addEventListener("resize",drawChart);
-
 loadTick();
 setInterval(loadTick,250);
 </script>
